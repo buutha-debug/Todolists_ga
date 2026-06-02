@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GARA: TASK_MANAGER</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap');
+        :root { --bg: #050505; --accent: #d4af37; --text: #a0a0a0; --border: #222; }
+        body { background: var(--bg); color: var(--text); font-family: 'JetBrains Mono', monospace; padding: 20px; display: flex; justify-content: center; }
+        #container { width: 100%; max-width: 600px; }
+        .module { background: #080808; border: 1px solid var(--border); padding: 15px; margin-bottom: 15px; }
+        .mod-header { display: flex; justify-content: space-between; border-bottom: 1px solid var(--border); padding-bottom: 8px; margin-bottom: 10px; color: var(--accent); }
+        .todo-item { display: flex; align-items: center; gap: 10px; margin: 8px 0; }
+        input[type="checkbox"] { accent-color: var(--accent); }
+        button { background: #1a1a1a; border: 1px solid #333; color: #666; cursor: pointer; padding: 5px 10px; }
+        button:hover { color: #fff; border-color: #fff; }
+        .main-btn { width: 100%; padding: 15px; margin-bottom: 20px; border: 1px solid var(--accent); color: var(--accent); }
+    </style>
+</head>
+<body>
+
+<div id="container">
+    <h2 style="color:white; text-align:center;">MISSION_TASKS</h2>
+    <button class="main-btn" onclick="addList()">[+] CREATE_NEW_LIST</button>
+    <div id="lists-container"></div>
+</div>
+
+<script>
+    let lists = JSON.parse(localStorage.getItem('gara_tasks')) || [];
+
+    function render() {
+        const container = document.getElementById('lists-container');
+        container.innerHTML = '';
+        lists.forEach((list, listIdx) => {
+            const div = document.createElement('div');
+            div.className = 'module';
+            let itemsHtml = list.items.map((item, itemIdx) => `
+                <div class="todo-item">
+                    <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggle(${listIdx}, ${itemIdx})">
+                    <span contenteditable="true" onblur="updateText(${listIdx}, ${itemIdx}, this.innerText)">${item.text}</span>
+                </div>
+            `).join('');
+            
+            div.innerHTML = `
+                <div class="mod-header">
+                    <span contenteditable="true" onblur="lists[${listIdx}].title=this.innerText; save()">${list.title}</span>
+                    <button onclick="deleteList(${listIdx})">DELETE_LIST</button>
+                </div>
+                ${itemsHtml}
+                <button style="margin-top:10px; width:100%" onclick="addItem(${listIdx})">[+] ADD_TASK</button>
+            `;
+            container.appendChild(div);
+        });
+    }
+
+    function addList() { lists.push({title: "NEW_LIST", items: []}); render(); save(); }
+    function addItem(i) { lists[i].items.push({text: "New Task...", done: false}); render(); save(); }
+    function toggle(l, i) { lists[l].items[i].done = !lists[l].items[i].done; save(); }
+    function updateText(l, i, val) { lists[l].items[i].text = val; save(); }
+    function deleteList(i) { lists.splice(i, 1); render(); save(); }
+    function save() { localStorage.setItem('gara_tasks', JSON.stringify(lists)); }
+
+    render();
+</script>
+</body>
+</html>
