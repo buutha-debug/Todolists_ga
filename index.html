@@ -38,7 +38,8 @@
             let itemsHtml = list.items.map((item, itemIdx) => `
                 <div class="todo-item">
                     <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggle(${listIdx}, ${itemIdx})">
-                    <span contenteditable="true" onblur="updateText(${listIdx}, ${itemIdx}, this.innerText)">${item.text}</span>
+                    <span contenteditable="true" style="flex-grow: 1; ${item.done ? 'text-decoration: line-through; opacity: 0.4;' : ''}" onblur="updateText(${listIdx}, ${itemIdx}, this.innerText)">${item.text}</span>
+                    <button onclick="deleteItem(${listIdx}, ${itemIdx})" style="padding: 2px 6px; font-size: 11px; color: #888;">&times;</button>
                 </div>
             `).join('');
             
@@ -56,9 +57,10 @@
 
     function addList() { lists.push({title: "NEW_LIST", items: []}); render(); save(); }
     function addItem(i) { lists[i].items.push({text: "New Task...", done: false}); render(); save(); }
-    function toggle(l, i) { lists[l].items[i].done = !lists[l].items[i].done; save(); }
+    function toggle(l, i) { lists[l].items[i].done = !lists[l].items[i].done; render(); save(); }
     function updateText(l, i, val) { lists[l].items[i].text = val; save(); }
     function deleteList(i) { lists.splice(i, 1); render(); save(); }
+    function deleteItem(l, i) { lists[l].items.splice(i, 1); render(); save(); }
     function save() { localStorage.setItem('gara_tasks', JSON.stringify(lists)); }
 
     render();
